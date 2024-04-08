@@ -36,12 +36,16 @@ function main() {
     
   };
   
-  const template = `Are you looking for a random tip? Look no further, my $user! The following tip will surely be of use (follow them at your own risk).
+  const template = `Are you looking for a random tip? Look no further, my $user!  
+
+  The following tip will surely be of use (follow them at your own risk).  
+  $tip Tip: If you are leaving for $place, make sure to bring your $item! This makes sure that you feel $emotion.  
+
+  People may $action you for this, but it will work out!  
   
-  $tip Tip: If you are leaving for $place, make sure to bring your $item! This makes sure that you feel $emotion. People may $action you for this, but it will work out!
   If this does not work, you can try $reaction for $num minutes to remedy this.
   
-  I hope you found this tip to be $end.
+  I hope you found this tip to be $end!
   
   `;
   
