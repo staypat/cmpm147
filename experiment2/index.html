@@ -39,18 +39,29 @@
 					<!-- canvas will be added here -->
 				</div>
                 <div class="fullscreen-box">
+					<button id="reimagine">Reimagine</button>
                     <button id="fullscreen">Fullscreen</button>
                 </div>
 			</div>
 
 			<div class="minor-section">
 				<h2>Description</h2>
-				<p>This experiment showcases my work in generating a living impression of an inspiring image using the impressionism art form.</p>
+				<p>This experiment showcases my work in generating a living impression of an inspiring image using the impressionism art form. This project offers a generative, living impression of this inspiring image:</p>
+				<div class="image-wrapper">
+					<img src="img/pinterest_flower_field.jpg">
+				</div>
 			</div>
 
 			<div class="minor-section">
 				<h2>Technical</h2>
-				<p>Describe in detail what you did technically and how it works?</p>
+				<p>Relation to inspring image:</p>
+				<ul>
+					<li>Color: The sky, grass, tree, and stone colors were sampled from the inspiring image using the Photoshop eyedropper tool.</li>
+					<li>Primitives: The trees are rendered with triangle primitives.</li>
+					<li>Polygons: The background mountain is a single randomly polygon using vertex calls.</li>
+					<li>Composition: Different random seed values lead to differently shaped mountains and differently positioned trees.</li>
+					<li>Life: The position of trees is animated over time as if to simulate the view from a passing train and the slightly responds to the horizontal motion of the mouse cursor.</li>
+				</ul>
 			</div>
 
 			<div class="minor-section">
