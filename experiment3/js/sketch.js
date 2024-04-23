@@ -190,9 +190,3 @@ function drawContext(grid, i, j, target, dti, dtj) {
   const [tiOffset, tjOffset] = lookup[code];
   placeTile(i, j, dti + tiOffset, dtj + tjOffset);
 }
-
-// mousePressed() function is called once after every time a mouse button is pressed
-function mousePressed() {
-  // code to run when mouse is pressed
-  regenerateGrid();
-}
