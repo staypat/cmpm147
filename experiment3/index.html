@@ -61,17 +61,31 @@
 
 			<div class="minor-section">
 				<h2>Description</h2>
-				<p>What are you trying to acomplish with this experiment?</p>
+				<p>This experiment showcases my work in using a tileset to generate two different maps: an overworld map and a dungeon map. Tileset Credit: <a href="https://thkaspar.itch.io/micro-tileset-overworld-dungeon">Micro Tileset - Overworld & Dungeon </a> by <a href="https://thkaspar.itch.io/">thkaspar</a><br>
+					The overworld map features ice, snowy trees, snowy houses, and a body of water which is inspired by my personal thought of what a snowy town would look like. <br>
+					The dungeon map features walls, rooms, and chests which is inspired by old-school dungeon rooms in video games.
+				</p>
 			</div>
 
 			<div class="minor-section">
 				<h2>Technical</h2>
-				<p>Describe in detail what you did technically and how it works?</p>
+				<p>
+					<li>Grids: Clicking the reseed button will generate a new grid based on a seed. This grid is parsed and the tiles will be placed based on the grid text.</li>
+					<li>Autotiling: For both of the grids, I use drawContext() and const lookup to properly draw the tiles corners depending on its neighbor.</li>
+					<li>Editing: The user can type certain codes to generate their own map.
+						<ul>
+							<li>For the <b>overworld map</b>, use w for water, h for house, : for trees, and . for ice.</li>
+							<li>For the <b>dungeon map</b>,  use # for walls, . for room generation, and c for chests.</li>
+						</ul>
+					</li>
+					<li>Incidentals: Different seed values lead to different tiles being used for my water, houses, trees, ice, walls, and chests because they utilize the random() function to select from the tileset.</li>
+					<li>Life: As time passes, the water fluctuates as if schools of fish are swimming by for the overworld map and the walls mimic silverfish travelling through the walls for the dungeon map.</li>
+				</p>
 			</div>
 
 			<div class="minor-section">
 				<h2>Reflection</h2>
-				<p>Each person that worked on the code should reflect on the process, the difficulties, and the successes of the experiment.</p>
+				<p>Working with p5.js this time was a lot more difficult because I had to take time to understand how tilesets worked. I found it difficult to properly place the correct tile in the right spot, but once I understood this, all I needed to do was create ways to generate my maps. The grid text generation was difficult because I found myself trying out a lot of random math functions in conjunction with noise() until I got my desired outcome. I used a lot of ChatGPT to help my understanding of what values were being generated from noise() and this helped me adjust value parameters according to what I needed. After this, I had to integrate both of my projects into the same html, but I found "instance mode" to be easy to learn and following the provided guide made my website cleaner.</p>
 			</div>
 
 		</section>
