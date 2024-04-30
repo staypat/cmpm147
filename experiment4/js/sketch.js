@@ -5,6 +5,8 @@
 // Here is how you might set up an OOP p5.js project
 // Note that p5.js looks for a file called sketch.js
 
+let key = "xyzzy";
+
 const w1 = (sketch) => {
   let tile_width_step_main; // A width step is half a tile's width
   let tile_height_step_main; // A height step is half a tile's height
@@ -72,19 +74,19 @@ const w1 = (sketch) => {
       p3_setup();
     }
   
-    let label = sketch.createP();
-    label.html("World key: ");
-    label.parent("canvas-container-1");
+    // let label = sketch.createP();
+    // label.html("World key: ");
+    // label.parent("canvas-container-1");
   
-    let input = sketch.createInput("xyzzy");
-    input.parent(label);
-    input.input(() => {
-      rebuildWorld(input.value());
-    });
+    // let input = sketch.createInput("xyzzy");
+    // input.parent(label);
+    // input.input(() => {
+    //   rebuildWorld(input.value());
+    // });
   
-    sketch.createP("Arrow keys scroll. Clicking changes tiles.").parent("canvas-container-1");
+    // sketch.createP("Arrow keys scroll. Clicking changes tiles.").parent("canvas-container-1");
   
-    rebuildWorld(input.value());
+    rebuildWorld(key);
   };
   
   function rebuildWorld(key) {
@@ -324,3 +326,670 @@ const w1 = (sketch) => {
 }
 
 let world1 = new p5(w1, 'w1');
+
+const w2 = (sketch) => {
+  let tile_width_step_main; // A width step is half a tile's width
+  let tile_height_step_main; // A height step is half a tile's height
+  
+  // Global variables. These will mostly be overwritten in setup().
+  let tile_rows, tile_columns;
+  let camera_offset;
+  let camera_velocity;
+  
+  /////////////////////////////
+  // Transforms between coordinate systems
+  // These are actually slightly weirder than in full 3d...
+  /////////////////////////////
+  function worldToScreen([world_x, world_y], [camera_x, camera_y]) {
+    let i = (world_x - world_y) * tile_width_step_main;
+    let j = (world_x + world_y) * tile_height_step_main;
+    return [i + camera_x, j + camera_y];
+  }
+  
+  function worldToCamera([world_x, world_y], [camera_x, camera_y]) {
+    let i = (world_x - world_y) * tile_width_step_main;
+    let j = (world_x + world_y) * tile_height_step_main;
+    return [i, j];
+  }
+  
+  function tileRenderingOrder(offset) {
+    return [offset[1] - offset[0], offset[0] + offset[1]];
+  }
+  
+  function screenToWorld([screen_x, screen_y], [camera_x, camera_y]) {
+    screen_x -= camera_x;
+    screen_y -= camera_y;
+    screen_x /= tile_width_step_main * 2;
+    screen_y /= tile_height_step_main * 2;
+    screen_y += 0.5;
+    return [Math.floor(screen_y + screen_x), Math.floor(screen_y - screen_x)];
+  }
+  
+  function cameraToWorldOffset([camera_x, camera_y]) {
+    let world_x = camera_x / (tile_width_step_main * 2);
+    let world_y = camera_y / (tile_height_step_main * 2);
+    return { x: Math.round(world_x), y: Math.round(world_y) };
+  }
+  
+  function worldOffsetToCamera([world_x, world_y]) {
+    let camera_x = world_x * (tile_width_step_main * 2);
+    let camera_y = world_y * (tile_height_step_main * 2);
+    return new p5.Vector(camera_x, camera_y);
+  }
+  
+  sketch.preload = () =>{
+    if (p3_preload) {
+      p3_preload();
+    }
+  };
+  
+  sketch.setup = () =>{
+    let canvas = sketch.createCanvas(800, 400);
+    canvas.parent("canvas-container-2");
+  
+    camera_offset = new p5.Vector(-sketch.width / 2, sketch.height / 2);
+    camera_velocity = new p5.Vector(0, 0);
+  
+    if (p3_setup) {
+      p3_setup();
+    }
+  
+    // let label = sketch.createP();
+    // label.html("World key: ");
+    // label.parent("canvas-container-2");
+  
+    // let input = sketch.createInput("xyzzy");
+    // input.parent(label);
+    // input.input(() => {
+    //   rebuildWorld(input.value());
+    // });
+  
+    // sketch.createP("Arrow keys scroll. Clicking changes tiles.").parent("canvas-container-2");
+  
+    rebuildWorld(key);
+  };
+  
+  function rebuildWorld(key) {
+    if (p3_worldKeyChanged) {
+      p3_worldKeyChanged(key);
+    }
+    tile_width_step_main = p3_tileWidth ? p3_tileWidth() : 32;
+    tile_height_step_main = p3_tileHeight ? p3_tileHeight() : 14.5;
+    tile_columns = Math.ceil(sketch.width / (tile_width_step_main * 2));
+    tile_rows = Math.ceil(sketch.height / (tile_height_step_main * 2));
+  }
+  
+  sketch.mouseClicked = () =>{
+    let world_pos = screenToWorld(
+      [0 - sketch.mouseX, sketch.mouseY],
+      [camera_offset.x, camera_offset.y]
+    );
+  
+    if (p3_tileClicked) {
+      p3_tileClicked(world_pos[0], world_pos[1]);
+    }
+    return false;
+  };
+  
+  sketch.draw = () =>{
+    // Keyboard controls!
+    if (sketch.keyIsDown(sketch.LEFT_ARROW)) {
+      camera_velocity.x -= 1;
+    }
+    if (sketch.keyIsDown(sketch.RIGHT_ARROW)) {
+      camera_velocity.x += 1;
+    }
+    if (sketch.keyIsDown(sketch.DOWN_ARROW)) {
+      camera_velocity.y -= 1;
+    }
+    if (sketch.keyIsDown(sketch.UP_ARROW)) {
+      camera_velocity.y += 1;
+    }
+  
+    let camera_delta = new p5.Vector(0, 0);
+    camera_velocity.add(camera_delta);
+    camera_offset.add(camera_velocity);
+    camera_velocity.mult(0.95); // cheap easing
+    if (camera_velocity.mag() < 0.01) {
+      camera_velocity.setMag(0);
+    }
+  
+    let world_pos = screenToWorld(
+      [0 - sketch.mouseX, sketch.mouseY],
+      [camera_offset.x, camera_offset.y]
+    );
+    let world_offset = cameraToWorldOffset([camera_offset.x, camera_offset.y]);
+  
+    sketch.background(100);
+  
+    if (p3_drawBefore) {
+      p3_drawBefore();
+    }
+  
+    let overdraw = 0.1;
+  
+    let y0 = Math.floor((0 - overdraw) * tile_rows);
+    let y1 = Math.floor((1 + overdraw) * tile_rows);
+    let x0 = Math.floor((0 - overdraw) * tile_columns);
+    let x1 = Math.floor((1 + overdraw) * tile_columns);
+  
+    for (let y = y0; y < y1; y++) {
+      for (let x = x0; x < x1; x++) {
+        drawTile(tileRenderingOrder([x + world_offset.x, y - world_offset.y]), [
+          camera_offset.x,
+          camera_offset.y
+        ]); // odd row
+      }
+      for (let x = x0; x < x1; x++) {
+        drawTile(
+          tileRenderingOrder([
+            x + 0.5 + world_offset.x,
+            y + 0.5 - world_offset.y
+          ]),
+          [camera_offset.x, camera_offset.y]
+        ); // even rows are offset horizontally
+      }
+    }
+  
+    describeMouseTile(world_pos, [camera_offset.x, camera_offset.y]);
+  
+    if (p3_drawAfter) {
+      p3_drawAfter();
+    }
+  };
+  
+  // Display a discription of the tile at world_x, world_y.
+  function describeMouseTile([world_x, world_y], [camera_x, camera_y]) {
+    let [screen_x, screen_y] = worldToScreen(
+      [world_x, world_y],
+      [camera_x, camera_y]
+    );
+    drawTileDescription([world_x, world_y], [0 - screen_x, screen_y]);
+  }
+  
+  function drawTileDescription([world_x, world_y], [screen_x, screen_y]) {
+    sketch.push();
+    sketch.translate(screen_x, screen_y);
+    if (p3_drawSelectedTile) {
+      p3_drawSelectedTile(world_x, world_y, screen_x, screen_y);
+    }
+    sketch.pop();
+  }
+  
+  // Draw a tile, mostly by calling the user's drawing code.
+  function drawTile([world_x, world_y], [camera_x, camera_y]) {
+    let [screen_x, screen_y] = worldToScreen(
+      [world_x, world_y],
+      [camera_x, camera_y]
+    );
+    sketch.push();
+    sketch.translate(0 - screen_x, screen_y);
+    if (p3_drawTile) {
+      p3_drawTile(world_x, world_y, -screen_x, screen_y);
+    }
+    sketch.pop();
+  }
+
+  /* global XXH */
+  /* exported --
+      p3_preload
+      p3_setup
+      p3_worldKeyChanged
+      p3_tileWidth
+      p3_tileHeight
+      p3_tileClicked
+      p3_drawBefore
+      p3_drawTile
+      p3_drawSelectedTile
+      p3_drawAfter
+  */
+
+  let ice;
+  let ice2;
+  let waterRock;
+  let waterRock2;
+  let water;
+  let water2;
+  
+  function p3_preload() {
+    ice = sketch.loadImage("https://cdn.glitch.global/0b38a742-65c0-438f-933f-d6b49f299e06/ice.png?v=1714334281683");
+    ice2 = sketch.loadImage("https://cdn.glitch.global/0b38a742-65c0-438f-933f-d6b49f299e06/ice2.png?v=1714334310461");
+    waterRock = sketch.loadImage("https://cdn.glitch.global/0b38a742-65c0-438f-933f-d6b49f299e06/waterRock.png?v=1714334372210");
+    waterRock2 = sketch.loadImage("https://cdn.glitch.global/0b38a742-65c0-438f-933f-d6b49f299e06/waterRock2.png?v=1714334375483");
+    water = sketch.loadImage("https://cdn.glitch.global/0b38a742-65c0-438f-933f-d6b49f299e06/water.png?v=1714334323777");
+    water2 = sketch.loadImage("https://cdn.glitch.global/0b38a742-65c0-438f-933f-d6b49f299e06/water2.png?v=1714334392311");
+  }
+  function p3_setup() {
+    ice.loadPixels();
+    ice2.loadPixels();
+    waterRock.loadPixels();
+    waterRock2.loadPixels();
+    water.loadPixels();
+    water2.loadPixels();
+  }
+  
+  let worldSeed;
+  
+  function p3_worldKeyChanged(key) {
+    worldSeed = XXH.h32(key, 0);
+    sketch.noiseSeed(worldSeed);
+    sketch.randomSeed(worldSeed);
+  }
+  
+  function p3_tileWidth() {
+    return 15;
+  }
+  function p3_tileHeight() {
+    return 15;
+  }
+  
+  let [tw, th] = [p3_tileWidth(), p3_tileHeight()];
+  
+  let clicks = {};
+  
+  function p3_tileClicked(i, j) {
+    let key = [i, j];
+    clicks[key] = 1 + (clicks[key] | 0);
+  }
+  
+  function p3_drawBefore() {}
+  
+  function p3_drawTile(i, j) {
+    sketch.noStroke();
+    
+    if ((sketch.floor(7 * sketch.noise(i, j))) < 2) {
+      let waterOffsetY = (sketch.sin(sketch.millis() / 500 + (0.25 * sketch.abs(i))) * 10) + 10;
+      sketch.image(water, 0 + waterOffsetY, 0, 64, 64);
+    } else if ((sketch.floor(7 * sketch.noise(i, j))) > 4) {
+      sketch.image(ice2, 0, 0, 64, 64);
+    } else if ((sketch.floor(7 * sketch.noise(i, j))) >= 4){
+      sketch.image(ice, 0, 0, 64, 64);
+    }else{
+      let waterOffsetY = (sketch.cos(sketch.millis() / 1000 + (0.33 * sketch.abs(i))) * 5) + 20;
+      sketch.image(water2, 0 + waterOffsetY, 0, 64, 64);
+    }
+    
+    if((sketch.floor(7 * sketch.noise(i, j))) > 5){
+      if (XXH.h32("tile:" + [i, j], worldSeed) % 4 == 0) {
+        sketch.image(waterRock2, 0, 0, 64, 64);
+      }
+    }
+  
+    sketch.push();
+  
+    // beginShape();
+    // vertex(-tw, 0);
+    // vertex(0, th);
+    // vertex(tw, 0);
+    // vertex(0, -th);
+    // endShape(CLOSE);
+  
+    let n = clicks[[i, j]] | 0;
+    if (n % 2 == 1) {
+      sketch.image(waterRock, -30, -39, 64, 64);
+    }
+  
+    sketch.pop();
+  }
+  
+  function p3_drawSelectedTile(i, j) {
+    sketch.noFill();
+    sketch.stroke(0, 255, 0, 128);
+  
+    // beginShape();
+    // vertex(-tw, 0);
+    // vertex(0, th);
+    // vertex(tw, 0);
+    // vertex(0, -th);
+    // endShape(CLOSE);
+  
+    // noStroke();
+    // fill(0);
+    // text("tile " + [i, j], 0, 0);
+  }
+  
+  function p3_drawAfter() {}
+}
+
+let world2 = new p5(w2, 'w2');
+
+const w3 = (sketch) => {
+  let tile_width_step_main; // A width step is half a tile's width
+  let tile_height_step_main; // A height step is half a tile's height
+  
+  // Global variables. These will mostly be overwritten in setup().
+  let tile_rows, tile_columns;
+  let camera_offset;
+  let camera_velocity;
+  
+  /////////////////////////////
+  // Transforms between coordinate systems
+  // These are actually slightly weirder than in full 3d...
+  /////////////////////////////
+  function worldToScreen([world_x, world_y], [camera_x, camera_y]) {
+    let i = (world_x - world_y) * tile_width_step_main;
+    let j = (world_x + world_y) * tile_height_step_main;
+    return [i + camera_x, j + camera_y];
+  }
+  
+  function worldToCamera([world_x, world_y], [camera_x, camera_y]) {
+    let i = (world_x - world_y) * tile_width_step_main;
+    let j = (world_x + world_y) * tile_height_step_main;
+    return [i, j];
+  }
+  
+  function tileRenderingOrder(offset) {
+    return [offset[1] - offset[0], offset[0] + offset[1]];
+  }
+  
+  function screenToWorld([screen_x, screen_y], [camera_x, camera_y]) {
+    screen_x -= camera_x;
+    screen_y -= camera_y;
+    screen_x /= tile_width_step_main * 2;
+    screen_y /= tile_height_step_main * 2;
+    screen_y += 0.5;
+    return [Math.floor(screen_y + screen_x), Math.floor(screen_y - screen_x)];
+  }
+  
+  function cameraToWorldOffset([camera_x, camera_y]) {
+    let world_x = camera_x / (tile_width_step_main * 2);
+    let world_y = camera_y / (tile_height_step_main * 2);
+    return { x: Math.round(world_x), y: Math.round(world_y) };
+  }
+  
+  function worldOffsetToCamera([world_x, world_y]) {
+    let camera_x = world_x * (tile_width_step_main * 2);
+    let camera_y = world_y * (tile_height_step_main * 2);
+    return new p5.Vector(camera_x, camera_y);
+  }
+  
+  sketch.preload = () =>{
+    if (p3_preload) {
+      p3_preload();
+    }
+  };
+  
+  sketch.setup = () =>{
+    let canvas = sketch.createCanvas(800, 400);
+    canvas.parent("canvas-container-3");
+  
+    camera_offset = new p5.Vector(-sketch.width / 2, sketch.height / 2);
+    camera_velocity = new p5.Vector(0, 0);
+  
+    if (p3_setup) {
+      p3_setup();
+    }
+  
+    let label = sketch.createP();
+    label.html("World key: ");
+    label.parent("canvas-container-3");
+  
+    let input = sketch.createInput("xyzzy");
+    input.parent(label);
+    input.input(() => {
+      rebuildWorld(input.value());
+    });
+  
+    sketch.createP("Arrow keys scroll. Clicking changes tiles.").parent("canvas-container-3");
+  
+    rebuildWorld(input.value());
+  };
+  
+  function rebuildWorld(key) {
+    if (p3_worldKeyChanged) {
+      p3_worldKeyChanged(key);
+    }
+    tile_width_step_main = p3_tileWidth ? p3_tileWidth() : 32;
+    tile_height_step_main = p3_tileHeight ? p3_tileHeight() : 14.5;
+    tile_columns = Math.ceil(sketch.width / (tile_width_step_main * 2));
+    tile_rows = Math.ceil(sketch.height / (tile_height_step_main * 2));
+  }
+  
+  sketch.mouseClicked = () =>{
+    let world_pos = screenToWorld(
+      [0 - sketch.mouseX, sketch.mouseY],
+      [camera_offset.x, camera_offset.y]
+    );
+  
+    if (p3_tileClicked) {
+      p3_tileClicked(world_pos[0], world_pos[1]);
+    }
+    return false;
+  };
+  
+  sketch.draw = () =>{
+    // Keyboard controls!
+    if (sketch.keyIsDown(sketch.LEFT_ARROW)) {
+      camera_velocity.x -= 1;
+    }
+    if (sketch.keyIsDown(sketch.RIGHT_ARROW)) {
+      camera_velocity.x += 1;
+    }
+    if (sketch.keyIsDown(sketch.DOWN_ARROW)) {
+      camera_velocity.y -= 1;
+    }
+    if (sketch.keyIsDown(sketch.UP_ARROW)) {
+      camera_velocity.y += 1;
+    }
+  
+    let camera_delta = new p5.Vector(0, 0);
+    camera_velocity.add(camera_delta);
+    camera_offset.add(camera_velocity);
+    camera_velocity.mult(0.95); // cheap easing
+    if (camera_velocity.mag() < 0.01) {
+      camera_velocity.setMag(0);
+    }
+  
+    let world_pos = screenToWorld(
+      [0 - sketch.mouseX, sketch.mouseY],
+      [camera_offset.x, camera_offset.y]
+    );
+    let world_offset = cameraToWorldOffset([camera_offset.x, camera_offset.y]);
+  
+    sketch.background(100);
+  
+    if (p3_drawBefore) {
+      p3_drawBefore();
+    }
+  
+    let overdraw = 0.1;
+  
+    let y0 = Math.floor((0 - overdraw) * tile_rows);
+    let y1 = Math.floor((1 + overdraw) * tile_rows);
+    let x0 = Math.floor((0 - overdraw) * tile_columns);
+    let x1 = Math.floor((1 + overdraw) * tile_columns);
+  
+    for (let y = y0; y < y1; y++) {
+      for (let x = x0; x < x1; x++) {
+        drawTile(tileRenderingOrder([x + world_offset.x, y - world_offset.y]), [
+          camera_offset.x,
+          camera_offset.y
+        ]); // odd row
+      }
+      for (let x = x0; x < x1; x++) {
+        drawTile(
+          tileRenderingOrder([
+            x + 0.5 + world_offset.x,
+            y + 0.5 - world_offset.y
+          ]),
+          [camera_offset.x, camera_offset.y]
+        ); // even rows are offset horizontally
+      }
+    }
+  
+    describeMouseTile(world_pos, [camera_offset.x, camera_offset.y]);
+  
+    if (p3_drawAfter) {
+      p3_drawAfter();
+    }
+  };
+  
+  // Display a discription of the tile at world_x, world_y.
+  function describeMouseTile([world_x, world_y], [camera_x, camera_y]) {
+    let [screen_x, screen_y] = worldToScreen(
+      [world_x, world_y],
+      [camera_x, camera_y]
+    );
+    drawTileDescription([world_x, world_y], [0 - screen_x, screen_y]);
+  }
+  
+  function drawTileDescription([world_x, world_y], [screen_x, screen_y]) {
+    sketch.push();
+    sketch.translate(screen_x, screen_y);
+    if (p3_drawSelectedTile) {
+      p3_drawSelectedTile(world_x, world_y, screen_x, screen_y);
+    }
+    sketch.pop();
+  }
+  
+  // Draw a tile, mostly by calling the user's drawing code.
+  function drawTile([world_x, world_y], [camera_x, camera_y]) {
+    let [screen_x, screen_y] = worldToScreen(
+      [world_x, world_y],
+      [camera_x, camera_y]
+    );
+    sketch.push();
+    sketch.translate(0 - screen_x, screen_y);
+    if (p3_drawTile) {
+      p3_drawTile(world_x, world_y, -screen_x, screen_y);
+    }
+    sketch.pop();
+  }
+
+  /* global XXH */
+  /* exported --
+      p3_preload
+      p3_setup
+      p3_worldKeyChanged
+      p3_tileWidth
+      p3_tileHeight
+      p3_tileClicked
+      p3_drawBefore
+      p3_drawTile
+      p3_drawSelectedTile
+      p3_drawAfter
+  */
+
+  let grass;
+  let water;
+  let rock;
+  let rock2;
+  let flower;
+  let flower2;
+  
+  function p3_preload() {
+    grass = sketch.loadImage("https://cdn.glitch.global/c44d414a-060c-4302-b20d-72ee4bbe1dc5/grass.png?v=1714466222737");
+    water = sketch.loadImage("https://cdn.glitch.global/c44d414a-060c-4302-b20d-72ee4bbe1dc5/water.png?v=1714464279697");
+    rock = sketch.loadImage("https://cdn.glitch.global/8b3b7a25-c5d2-4814-b789-c42ba416a25e/rock.png?v=1714291957297");
+    rock2 = sketch.loadImage("https://cdn.glitch.global/8b3b7a25-c5d2-4814-b789-c42ba416a25e/rock2.png?v=1714291974798");
+    flower = sketch.loadImage("https://cdn.glitch.global/c44d414a-060c-4302-b20d-72ee4bbe1dc5/flower.png?v=1714462657315");
+    flower2 = sketch.loadImage("https://cdn.glitch.global/c44d414a-060c-4302-b20d-72ee4bbe1dc5/flower2.png?v=1714462668546")
+  }
+  function p3_setup() {
+    grass.loadPixels();
+    water.loadPixels();
+    rock.loadPixels();
+    rock2.loadPixels();
+    flower.loadPixels();
+    flower2.loadPixels();
+  }
+  
+  let worldSeed;
+  
+  function p3_worldKeyChanged(key) {
+    worldSeed = XXH.h32(key, 0);
+    sketch.noiseSeed(worldSeed);
+    sketch.randomSeed(worldSeed);
+  }
+  
+  function p3_tileWidth() {
+    return 32;
+  }
+  function p3_tileHeight() {
+    return 16;
+  }
+  
+  let [tw, th] = [p3_tileWidth(), p3_tileHeight()];
+  
+  let clicks = {};
+  
+  function p3_tileClicked(i, j) {
+    let key = [i, j];
+    let n = (clicks[key] || 0) + 1;
+    clicks[key] = n % 3;
+    
+    if (n === 1) {
+      setTimeout(() => {
+        clicks[key] = 2;
+      }, 3000);
+    }
+  }
+  
+  function p3_drawBefore() {}
+  
+  function p3_drawTile(i, j) {
+    sketch.noStroke();
+    
+    if ((sketch.floor(7 * sketch.noise(i, j))) * 1.5 < 4 && (sketch.floor(6 * sketch.noise(i, j))) < 3) {
+      sketch.image(grass, 0, 0, 64, 64);
+    } else if ((sketch.floor(6 * sketch.noise(i, j))) * 1.1 < 5 && (sketch.floor(6 * sketch.noise(i * 5, j * 5))) < 3) {
+      let windOffsetX = (sketch.sin(sketch.millis() / 1250 + (0.5 * sketch.abs(i))) * 5) + 10;
+      sketch.image(water, 0 + windOffsetX, 0, 64, 64);
+    } else {
+      sketch.image(rock, 10, 0, 64, 64);
+    }
+    
+    if((sketch.floor(7 * sketch.noise(i, j))) > 4){
+      if (XXH.h32("tile:" + [i, j], worldSeed) % 4 == 0) {
+        sketch.image(rock2, 0, 0, 64, 64);
+      }
+    }
+  
+    sketch.push();
+  
+    // beginShape();
+    // vertex(-tw, 0);
+    // vertex(0, th);
+    // vertex(tw, 0);
+    // vertex(0, -th);
+    // endShape(CLOSE);
+  
+    let n = clicks[[i, j]] | 0;
+    if(((sketch.floor(6 * sketch.noise(i, j))) >= 4)){
+      if (n % 2 == 1) {
+        sketch.image(flower, -30, -30, 64, 64);
+      }else if (n === 2){
+        sketch.image(flower2, -30, -30, 64, 64);
+        clicks[key] = 1;
+      }
+    }
+    if (n % 2 == 1) {
+      sketch.image(flower, -30, -30, 64, 64);
+    }else if (n === 2){
+      sketch.image(flower2, -30, -30, 64, 64);
+      clicks[key] = 1;
+    }
+  
+    sketch.pop();
+  }
+  
+  function p3_drawSelectedTile(i, j) {
+    sketch.noFill();
+    sketch.stroke(0, 255, 0, 128);
+  
+  //   beginShape();
+  //   vertex(-tw, 0);
+  //   vertex(0, th);
+  //   vertex(tw, 0);
+  //   vertex(0, -th);
+  //   endShape(CLOSE);
+  
+  //   noStroke();
+  //   fill(0);
+  //   text("tile " + [i, j], 0, 0);
+  }
+  
+  function p3_drawAfter() {}
+}
+
+let world3 = new p5(w3, 'w3');
