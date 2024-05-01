@@ -54,21 +54,26 @@
 			<div class="minor-section">
 				<h2>Description</h2>
 				<p>
+					This experiment showcases my work in using a tileset to work in an isometric environment to create a pseudo-infinite and pseudo-random world that is deterministic with a user-editable key. Tileset Credit: <a href="https://scrabling.itch.io/pixel-isometric-tiles">32 x 32 Pixel Isometric Tiles </a> by <a href="https://scrabling.itch.io/">scrabling</a><br>
+					The first world displays my attempt at recreating a grassland with rocks.<br>
+					The second world displays my attempt at recreating Antartica with icebergs and water.<br>
+					The third world displays my attempt at creating a swamp/pond combination with water, rocks, and grass.
 				</p>
 			</div>
 
 			<div class="minor-section">
 				<h2>Technical</h2>
 				<p>
-					<li>Infinity: </li>
-					<li>Variation in Space: </li>
-					<li>Variation in Key: </li>
-					<li>Signs of Life: </li>
+					<li>Infinity: I used the infinite extent of my worlds to represent a grassland with rocks, Antartica with icebergs and water, and a swamp/pond combination with water, rocks, and grass.</li>
+					<li>Variation in Space: As the audience browses my worlds, they’ll see different variations of rocks, grass, ice, and water tiles set up.</li>
+					<li>Variation in Key: Different worlds will have the previously mentioned tiles spawning in different areas.</li>
+					<li>Signs of Life: Clicking tiles causes logs, rocks, or plants (that grow after a delay) to spawn while the passage of time results in the grass or water moving back and forth. Plants also grow when clicking a tile after a brief delay in the third world.</li>
 				</p>
 			</div>
 
 			<div class="minor-section">
 				<h2>Reflection</h2>
+				Working with p5.js this time was difficult because I had to take time to understand how the draw functions and tiles were set up. I found it difficult to properly place the correct tile in the right spot because of the isometric set up, but once I understood this, I used noise functions to create a varied world. I ran into some problems with the draw function because it updated every 60 frames, but I changed drawTile() so that each image would look properly rendered and not glitching. The integration of 3 canvases was similar to Experiment 3, but I decided to only have one text box to change all 3 worlds because it would be simpler to look at.
 				<p></p>
 			</div>
 
