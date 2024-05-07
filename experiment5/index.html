@@ -82,23 +82,22 @@
 
 			<div class="minor-section">
 				<h2>Description</h2>
-				<p></p>
+				<p>This experiment showcases my work in building a generator that reads inspiring images, renders parameterized images, and adjusts its own designs to optimize an evaluation score.</p>
 			</div>
 
 			<div class="minor-section">
 				<h2>Technical</h2>
-				<p>Relation to inspring image:</p>
-				<ul>
-					<li>Drop-down: </li>
-					<li>initDesign: </li>
-					<li>Annealing: </li>
-					<li>Incremental Changes: </li>
-				</ul>
+				<p>
+				1. My project integrates three new and inspiring images that are selectable from the drop-down on the display page: `Nature, Northern Lights, and Cherry Blossoms`. <br>
+				2. The design object is initialized in inspiration-specific ways. Selecting different inspirations lead to different behaviors of initDesign in how the shape is created in terms of `height, width, and size of the shape`. <br>
+				3. The design is rendered with respect to the designated shape defined in the drawShape object of the array. As the user drags the mutation rate up and down `(annealing)`, the picture becomes more defined, closely resembling the original image. <br>
+				4. The mutation process makes incremental changes to my design and the rate parameter is implemented such that the user may almost stop exploration by sliding the rate down to 1%. <br>
+				</p>
 			</div>
 
 			<div class="minor-section">
 				<h2>Reflection</h2>
-				<p></p>
+				<p>Overall, this generator was the most fun for me. I found it to be challenging in the correct ways. My main struggle was trying to get the color of every pixel from the original image and then mapping it onto a shape that was rendered from an array of shapes. After I got the color matching to work, I was mainly focused on tuning the hyperparameters so that the exploration rate wouldn't become too low to work with. I did this by adjusting how many shapes were being spawned and the range of each mutation so it wouldn't create large, drastic changes. Similarly, I played with 2 different shapes (rectangles and ellipses) to spawn in for a chosen image and I learned that ellipses create more accurate photos because of the roundedness it has which creates more organic depictions of the original shapes when layered over other ellipses.</p>
 			</div>
 
 		</section>

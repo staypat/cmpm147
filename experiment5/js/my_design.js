@@ -65,12 +65,12 @@ function getInspirations() {
 
     let design = [];
     for (let i = 0; i < 1000; i++) {
-      let circle = {
+      let shape = {
         x: random(width),
         y: random(height),
         diameter: random(8, 16)
       };
-      design.push(circle);
+      design.push(shape);
     }
   
     return design;
@@ -86,9 +86,9 @@ function getInspirations() {
     
     rectMode(CENTER);
   
-    for (let circle of design) {
-      let pixelX = Math.floor((circle.x / width) * imageWidth);
-      let pixelY = Math.floor((circle.y / height) * imageHeight);
+    for (let shape of design) {
+      let pixelX = Math.floor((shape.x / width) * imageWidth);
+      let pixelY = Math.floor((shape.y / height) * imageHeight);
       pixelX = constrain(pixelX, 0, imageWidth - 1);
       pixelY = constrain(pixelY, 0, imageHeight - 1);
       let pixelIndex = (pixelY * imageWidth + pixelX) * 4;
@@ -96,15 +96,15 @@ function getInspirations() {
       let g = inspiration.image.pixels[pixelIndex + 1];
       let b = inspiration.image.pixels[pixelIndex + 2];
       fill(r, g, b);
-      inspiration.drawShape(circle.x, circle.y, circle.diameter, circle.diameter);
+      inspiration.drawShape(shape.x, shape.y, shape.diameter, shape.diameter);
     }
   
     inspiration.image.updatePixels();
   }
   
   function mutateDesign(design, inspiration, rate) {
-    for (let circle of design) {
-      circle.diameter = mut(circle.diameter || 50, 30, 60, rate);
+    for (let shape of design) {
+      shape.diameter = mut(shape.diameter || 50, 30, 60, rate);
     }
   }
   
